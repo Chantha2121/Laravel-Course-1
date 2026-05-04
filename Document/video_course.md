@@ -23,3 +23,9 @@ Link : https://youtu.be/STzrWZIc-W0
 ### Part 6: PHP Course Part 1
 
 Link : https://youtu.be/b_POVYfetAM
+
+### Part 7: PHP Course Part 2
+Link : https://youtu.be/nnhImJt5QH8
+
+### Part 8: PHP Course Part 3
+Link : https://youtu.be/5MwAFAvT4i4
