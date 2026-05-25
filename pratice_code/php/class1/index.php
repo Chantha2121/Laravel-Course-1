@@ -11,9 +11,15 @@
   <?php
   class Book
   {
+    protected $number = 10;
+
+    public function __construct()
+    {
+      $this->number = 5;
+    }
     public function name()
     {
-      echo "Drupal Book";
+      echo "The number of book is" . $this->number . "<br>";
     }
 
     public function price()
@@ -21,18 +27,35 @@
       echo "Price: $20";
     }
   }
-  
 
-  $obj = new Book();
-  $obj->name();
-  echo "<br>";
-  $obj->price();
-  echo "<br>";
+  class Magazine extends Book
+  {
+    public function __construct()
+    {
+      $this->number = 5;
+    }
 
-  $obj2 = new Book();
-  $obj2->name();
-  echo "<br>";
-  $obj2->price();
+    public function getnumber()
+    {
+      echo "The number of magazine is" . $this->number . "<br>";
+    }
+  }
+
+
+  // $book = new Book();
+  // $book->number = 15;
+  // $book->name();
+
+  // $magazine = new Magazine();
+  // $magazine->number = 5;
+  // $magazine->number2 = 10;
+  // $magazine->name();
+
+  $book = new Book();
+  $book->name();
+
+  $magazine = new Magazine();
+  $magazine->name();
 
   ?>
 </body>
