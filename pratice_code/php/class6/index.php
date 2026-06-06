@@ -4,7 +4,7 @@
 // Main Class or Parent Class
 class Fruit
 {
-  public $name;
+  protected $name;
   public $color;
 
   public function __construct($name, $color)
@@ -32,6 +32,7 @@ class Apple extends Fruit
 
   public function intro()
   {
+    parent::$name = "Apple";
     echo "The fruit is {$this->name}, the color is {$this->color} and the weight is {$this->weight} grams.";
   }
   public function message()
