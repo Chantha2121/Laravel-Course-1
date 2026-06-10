@@ -8,6 +8,7 @@
 </head>
 
 <body>
+  
   <?php
   $cars = array(23, 'Toyota');
 

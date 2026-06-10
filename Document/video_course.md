@@ -44,31 +44,50 @@ Link : https://youtu.be/e9I7bJJa9hg
 
 Link : https://youtu.be/9eCXz4nd3pg
 
-
 ### Part 12: PHP Course Part 7(1)
+
 Link : https://youtu.be/HN3D2BLeS1M
 
 ### Part 13: PHP Course Part 7(2)
+
 Link : https://youtu.be/EvH1kva1Sy8
 
-
 ### Part 14: PHP Course Part 8(1)
+
 Link : https://youtu.be/UOXRbYZYrks
 
 ### Part 15: PHP Course Part 8(2)
+
 Link : https://youtu.be/T8MMYoukPCA
 
 ### Part 16: PHP Course Part 9(1)
+
 Link : https://youtu.be/yzmDSoyOZkM
 
 ### Part 17: PHP Course Part 9(2)
+
 Link : https://youtu.be/0y_w_scRPC4
 
 ### Part 18: PHP Course Part 10
+
 Link : https://youtu.be/8R0w7p-yvRs
 
 ### Part 19: PHP Course Part 11(1)
+
 Link : https://youtu.be/dmxhmKfalMI
 
 ### Part 20: PHP Course Part 11(2)
+
 Link : https://youtu.be/9rB55VCcZtI
+
+### Part 21: PHP Course Part 12
+
+Link : https://youtu.be/iyhwhUORt5Q
+
+### Part 22: Database 1
+
+Link : https://youtu.be/odXQPJVMVvk
+
+### Part 23: Database 2
+
+Link : https://youtu.be/_UdIuulGz4s
