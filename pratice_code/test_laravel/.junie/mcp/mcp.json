@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Applications/ServBay/package/php/8.3/8.3.23/bin/php",
+            "args": [
+                "/Users/choeurnchantha/Course/Laravel/Satur-Sun-8/pratice_code/test_laravel/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
