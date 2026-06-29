@@ -101,3 +101,10 @@ Link : https://youtu.be/cA28ljbS-wE
 Link : https://youtu.be/R1vCIo4Oxeg
 
 
+### Part 23: Laravel 1
+
+Link : https://youtu.be/kRJg-ZbfWAk
+
+### Part 23: Laravel 2
+
+Link : https://youtu.be/bCfE79OUuWw
