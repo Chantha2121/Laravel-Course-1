@@ -2,18 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Post extends Model
 {
-    const TABLE_NAME = 'posts';
-    const COLUMN_ID = 'id';
-    const COLUMN_TITLE = 'title';
-    const COLUMN_CONTENT = 'content';
+    use HasFactory;
 
-    protected $table = self::TABLE_NAME;
-    protected $fillable = [
-        self::COLUMN_TITLE,
-        self::COLUMN_CONTENT,
+    protected $fillable = ['title', 'slug', 'content', 'is_published'];
+
+    protected $casts = [
+        'is_published' => 'boolean',
     ];
+
+    // Automatically generate slug before saving
+    protected static function booted()
+    {
+        static::saving(function ($post) {
+            $post->slug = Str::slug($post->title);
+        });
+    }
 }
