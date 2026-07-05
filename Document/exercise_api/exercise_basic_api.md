@@ -1,6 +1,6 @@
 # Laravel API CRUD Practice Exercises
 
-This document contains 5 progressive exercises for learning and practicing RESTful API CRUD (Create, Read, Update, Delete) development in Laravel.
+This document contains 5 progressive exercises for learning and practicing RESTful API CRUD (Create, Read, Update, Delete) development in Laravel, complete with step-by-step implementation code.
 
 ---
 
@@ -27,43 +27,117 @@ Learn how to create a basic API CRUD with standard data types, request validatio
 | `PUT` | `/api/products/{id}` | `ProductController@update` | Update a product (Full update) |
 | `DELETE` | `/api/products/{id}` | `ProductController@destroy` | Delete a product |
 
-### Validation Rules
-For both `POST` and `PUT` requests:
-- `name`: Required, String, Max 255 characters
-- `price`: Required, Numeric, Minimum 0
-- `stock`: Optional, Integer, Minimum 0
+---
 
-### Sample Request & Response payloads
+### Solution Code
 
-#### Create Product (POST `/api/products`)
-**Request Body (JSON)**:
-```json
+#### 1. Migration (`database/migrations/xxxx_xx_xx_create_products_table.php`)
+```php
+public function up(): void
 {
-  "name": "Mechanical Keyboard",
-  "description": "RGB backlight mechanical keyboard with blue switches.",
-  "price": 59.99,
-  "stock": 15
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->text('description')->nullable();
+        $table->decimal('price', 8, 2);
+        $table->integer('stock')->default(0);
+        $table->timestamps();
+    });
 }
 ```
 
-**Success Response (JSON - 201 Created)**:
-```json
+#### 2. Model (`app/Models/Product.php`)
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
 {
-  "message": "Product created successfully.",
-  "data": {
-    "id": 1,
-    "name": "Mechanical Keyboard",
-    "description": "RGB backlight mechanical keyboard with blue switches.",
-    "price": 59.99,
-    "stock": 15,
-    "created_at": "2026-07-05T13:20:00.000000Z",
-    "updated_at": "2026-07-05T13:20:00.000000Z"
-  }
+    use HasFactory;
+
+    protected $fillable = ['name', 'description', 'price', 'stock'];
 }
 ```
 
-#### Challenge/Bonus
-Implement global exception handling in your application so that if a product is not found (`ModelNotFoundException`), it returns a clean JSON error response (`404 Not Found`) instead of a HTML exception page.
+#### 3. Routes (`routes/api.php`)
+```php
+use App\Http\Controllers\ProductController;
+
+Route::apiResource('products', ProductController::class);
+```
+
+#### 4. Controller (`app/Http/Controllers/ProductController.php`)
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\Http\Request;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        $products = Product::all();
+        return response()->json([
+            'message' => 'Products retrieved successfully.',
+            'data' => $products
+        ], 200);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+        ]);
+
+        $product = Product::create($validated);
+
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'data' => $product
+        ], 201);
+    }
+
+    public function show(Product $product)
+    {
+        return response()->json([
+            'message' => 'Product retrieved successfully.',
+            'data' => $product
+        ], 200);
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+        ]);
+
+        $product->update($validated);
+
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'data' => $product
+        ], 200);
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return response()->json([
+            'message' => 'Product deleted successfully.'
+        ], 200);
+    }
+}
+```
 
 ---
 
@@ -93,22 +167,127 @@ Learn about route model binding, unique field validation (with exception on upda
 | `DELETE` | `/api/students/{student}` | `StudentController@destroy` | Soft delete a student |
 | `PATCH` | `/api/students/{id}/restore` | `StudentController@restore` | Restore a soft-deleted student |
 
-### Validation Rules
-- `first_name`: Required, String, Max 100
-- `last_name`: Required, String, Max 100
-- `email`: Required, Valid Email format, Unique database constraint (Ignore current student ID on update)
-- `date_of_birth`: Required, Valid Date before today
+---
 
-### Sample Response: Soft Delete (DELETE `/api/students/5`)
-**Success Response (JSON - 200 OK)**:
-```json
+### Solution Code
+
+#### 1. Migration (`database/migrations/xxxx_xx_xx_create_students_table.php`)
+```php
+public function up(): void
 {
-  "message": "Student soft-deleted successfully."
+    Schema::create('students', function (Blueprint $table) {
+        $table->id();
+        $table->string('first_name');
+        $table->string('last_name');
+        $table->string('email')->unique();
+        $table->date('date_of_birth');
+        $table->boolean('is_active')->default(true);
+        $table->softDeletes(); // Adds 'deleted_at' column
+        $table->timestamps();
+    });
 }
 ```
 
-#### Challenge/Bonus
-Create a database seeder that generates 50 students using Laravel Factory so you have dummy data to test your endpoints.
+#### 2. Model (`app/Models/Student.php`)
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Student extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = ['first_name', 'last_name', 'email', 'date_of_birth', 'is_active'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'date_of_birth' => 'date',
+    ];
+}
+```
+
+#### 3. Routes (`routes/api.php`)
+```php
+use App\Http\Controllers\StudentController;
+
+Route::get('/students/trashed', [StudentController::class, 'onlyTrashed']);
+Route::patch('/students/{id}/restore', [StudentController::class, 'restore']);
+Route::apiResource('students', StudentController::class);
+```
+
+#### 4. Controller (`app/Http/Controllers/StudentController.php`)
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Student;
+use Illuminate\Http\Request;
+
+class StudentController extends Controller
+{
+    public function index()
+    {
+        return response()->json(Student::all(), 200);
+    }
+
+    public function onlyTrashed()
+    {
+        // Retrieve only soft-deleted models
+        $trashed = Student::onlyTrashed()->get();
+        return response()->json($trashed, 200);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|unique:students,email',
+            'date_of_birth' => 'required|date|before:today',
+            'is_active' => 'boolean'
+        ]);
+
+        $student = Student::create($validated);
+        return response()->json($student, 201);
+    }
+
+    public function show(Student $student)
+    {
+        return response()->json($student, 200);
+    }
+
+    public function update(Request $request, Student $student)
+    {
+        // Exclude the current student ID from unique email check
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|unique:students,email,' . $student->id,
+            'date_of_birth' => 'required|date|before:today',
+            'is_active' => 'boolean'
+        ]);
+
+        $student->update($validated);
+        return response()->json($student, 200);
+    }
+
+    public function destroy(Student $student)
+    {
+        $student->delete(); // Soft deletes the student
+        return response()->json(['message' => 'Student soft-deleted successfully.'], 200);
+    }
+
+    public function restore($id)
+    {
+        $student = Student::onlyTrashed()->findOrFail($id);
+        $student->restore();
+
+        return response()->json(['message' => 'Student restored successfully.', 'data' => $student], 200);
+    }
+}
+```
 
 ---
 
@@ -136,49 +315,148 @@ Implement search query parameters, filtering, sorting, custom status patch updat
 | `PATCH` | `/api/tasks/{task}/status` | `TaskController@updateStatus` | Custom endpoint to update task status only |
 | `DELETE` | `/api/tasks/{task}` | `TaskController@destroy` | Delete a task |
 
-### Filtering & Sorting parameters
-- `GET /api/tasks?search=laundry` (Search by title or description)
-- `GET /api/tasks?status=completed` (Filter by status)
-- `GET /api/tasks?priority=high` (Filter by priority)
-- `GET /api/tasks?sort_by=due_date&sort_order=desc` (Sort by field and order)
-- `GET /api/tasks?per_page=10` (Dynamic pagination limit)
+---
 
-### Sample Response: Paginated Tasks List (GET `/api/tasks?status=pending&per_page=2`)
-**Success Response (JSON - 200 OK)**:
-```json
+### Solution Code
+
+#### 1. Migration (`database/migrations/xxxx_xx_xx_create_tasks_table.php`)
+```php
+public function up(): void
 {
-  "data": [
+    Schema::create('tasks', function (Blueprint $table) {
+        $table->id();
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->date('due_date');
+        $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
+        $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+        $table->timestamps();
+    });
+}
+```
+
+#### 2. Model (`app/Models/Task.php`)
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Task extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'description', 'due_date', 'status', 'priority'];
+}
+```
+
+#### 3. Routes (`routes/api.php`)
+```php
+use App\Http\Controllers\TaskController;
+
+Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+Route::apiResource('tasks', TaskController::class);
+```
+
+#### 4. Controller (`app/Http/Controllers/TaskController.php`)
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Task;
+use Illuminate\Http\Request;
+
+class TaskController extends Controller
+{
+    public function index(Request $request)
     {
-      "id": 2,
-      "title": "Buy groceries",
-      "description": "Buy milk, eggs, and bread.",
-      "due_date": "2026-07-06",
-      "status": "pending",
-      "priority": "medium"
-    },
-    {
-      "id": 4,
-      "title": "Fix bug #104",
-      "description": "Fix logout issue in API.",
-      "due_date": "2026-07-08",
-      "status": "pending",
-      "priority": "high"
+        $query = Task::query();
+
+        // 1. Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Exact status match
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // 3. Exact priority match
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
+        // 4. Custom sorting
+        $sortBy = $request->get('sort_by', 'due_date'); // Default sort field
+        $sortOrder = $request->get('sort_order', 'asc'); // Default sort order
+        
+        $allowedFields = ['due_date', 'priority', 'status', 'created_at'];
+        if (in_array($sortBy, $allowedFields)) {
+            $query->orderBy($sortBy, $sortOrder === 'desc' ? 'desc' : 'asc');
+        }
+
+        // 5. Dynamic pagination limit
+        $perPage = (int) $request->get('per_page', 10);
+
+        return response()->json($query->paginate($perPage), 200);
     }
-  ],
-  "links": {
-    "first": "http://localhost:8000/api/tasks?page=1",
-    "last": "http://localhost:8000/api/tasks?page=5",
-    "prev": null,
-    "next": "http://localhost:8000/api/tasks?page=2"
-  },
-  "meta": {
-    "current_page": 1,
-    "from": 1,
-    "last_page": 5,
-    "per_page": 2,
-    "to": 2,
-    "total": 10
-  }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'due_date' => 'required|date',
+            'status' => 'nullable|in:pending,in_progress,completed',
+            'priority' => 'nullable|in:low,medium,high',
+        ]);
+
+        $task = Task::create($validated);
+        return response()->json($task, 201);
+    }
+
+    public function show(Task $task)
+    {
+        return response()->json($task, 200);
+    }
+
+    public function update(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'due_date' => 'required|date',
+            'status' => 'required|in:pending,in_progress,completed',
+            'priority' => 'required|in:low,medium,high',
+        ]);
+
+        $task->update($validated);
+        return response()->json($task, 200);
+    }
+
+    public function updateStatus(Request $request, Task $task)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+        ]);
+
+        $task->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Status updated successfully.',
+            'data' => $task
+        ], 200);
+    }
+
+    public function destroy(Task $task)
+    {
+        $task->delete();
+        return response()->json(['message' => 'Task deleted successfully.'], 200);
+    }
 }
 ```
 
@@ -203,38 +481,164 @@ Build relationships (One-to-Many), configure foreign keys, and utilize Laravel A
 - `isbn` (String, Unique, Required)
 - `published_year` (Integer, Required)
 
-### API Endpoints
-| HTTP Method | URI | Controller Action | Description |
-|---|---|---|---|
-| `GET` | `/api/authors` | `AuthorController@index` | Get list of authors |
-| `POST` | `/api/authors` | `AuthorController@store` | Create author |
-| `GET` | `/api/books` | `BookController@index` | Get list of books (include author resource details) |
-| `POST` | `/api/books` | `BookController@store` | Create book |
-| `GET` | `/api/books/{book}` | `BookController@show` | View details of a book |
-| `PUT` | `/api/books/{book}` | `BookController@update` | Update details of a book |
-| `DELETE` | `/api/books/{book}` | `BookController@destroy` | Delete a book |
+---
 
-### Validation Rules for Books
-- `author_id`: Required, must exist in `authors` table
-- `title`: Required, String, Max 255
-- `isbn`: Required, Unique in `books` table, format must match valid ISBN-13 format (13 digits, optionally containing hyphens). Use custom Regex or Custom Rule validation.
-- `published_year`: Required, Integer between 1000 and current year
+### Solution Code
 
-### API Resource Customization
-Create a `BookResource` that wraps the book response and includes author details nested inside it.
-Expected output format for `GET /api/books/1`:
-```json
+#### 1. Migrations (`database/migrations/xxxx_xx_xx_create_authors_and_books_tables.php`)
+```php
+// Migration for Authors
+Schema::create('authors', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+    $table->text('bio')->nullable();
+    $table->timestamps();
+});
+
+// Migration for Books
+Schema::create('books', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('author_id')->constrained()->onDelete('cascade');
+    $table->string('title');
+    $table->string('isbn')->unique();
+    $table->integer('published_year');
+    $table->timestamps();
+});
+```
+
+#### 2. Models & Relationships
+**`app/Models/Author.php`**
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Author extends Model
 {
-  "data": {
-    "id": 1,
-    "book_title": "Laravel Patterns",
-    "isbn_code": "978-3-16-148410-0",
-    "year": 2024,
-    "author": {
-      "id": 3,
-      "author_name": "Taylor Otwell"
+    protected $fillable = ['name', 'bio'];
+
+    public function books()
+    {
+        return $this->hasMany(Book::class);
     }
-  }
+}
+```
+
+**`app/Models/Book.php`**
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Book extends Model
+{
+    protected $fillable = ['author_id', 'title', 'isbn', 'published_year'];
+
+    public function author()
+    {
+        return $this->belongsTo(Author::class);
+    }
+}
+```
+
+#### 3. API Resources
+**`app/Http/Resources/AuthorResource.php`**
+```php
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AuthorResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'author_name' => $this->name,
+            'bio' => $this->bio,
+        ];
+    }
+}
+```
+
+**`app/Http/Resources/BookResource.php`**
+```php
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BookResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'book_title' => $this->title,
+            'isbn_code' => $this->isbn,
+            'year' => $this->published_year,
+            // Only include author when it is eager loaded
+            'author' => new AuthorResource($this->whenLoaded('author')),
+        ];
+    }
+}
+```
+
+#### 4. Controller (`app/Http/Controllers/BookController.php`)
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Book;
+use App\Http\Resources\BookResource;
+use Illuminate\Http\Request;
+
+class BookController extends Controller
+{
+    public function index()
+    {
+        // Eager load relationships to prevent N+1 query problem
+        $books = Book::with('author')->get();
+        return BookResource::collection($books);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'author_id' => 'required|exists:authors,id',
+            'title' => 'required|string|max:255',
+            // Custom ISBN format check via regex (matches 978- or 979- formats)
+            'isbn' => 'required|unique:books,isbn|regex:/^(97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]{1,7}[- ]?[0-9]{1,7}[- ]?[0-9]$/',
+            'published_year' => 'required|integer|between:1000,' . date('Y'),
+        ]);
+
+        $book = Book::create($validated);
+        return new BookResource($book->load('author'));
+    }
+
+    public function show(Book $book)
+    {
+        return new BookResource($book->load('author'));
+    }
+
+    public function update(Request $request, Book $book)
+    {
+        $validated = $request->validate([
+            'author_id' => 'required|exists:authors,id',
+            'title' => 'required|string|max:255',
+            'isbn' => 'required|regex:/^(97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]{1,7}[- ]?[0-9]{1,7}[- ]?[0-9]$/|unique:books,isbn,' . $book->id,
+            'published_year' => 'required|integer|between:1000,' . date('Y'),
+        ]);
+
+        $book->update($validated);
+        return new BookResource($book->load('author'));
+    }
+
+    public function destroy(Book $book)
+    {
+        $book->delete();
+        return response()->json(['message' => 'Book deleted successfully.'], 200);
+    }
 }
 ```
 
@@ -253,38 +657,141 @@ Learn to handle file uploads, validate file inputs, store uploaded files in the 
 - `email` (String, Unique, Required)
 - `profile_picture` (String, Nullable, stores relative file path in storage)
 
-### API Endpoints
-| HTTP Method | URI | Controller Action | Description |
-|---|---|---|---|
-| `GET` | `/api/employees` | `EmployeeController@index` | Get list of employees |
-| `POST` | `/api/employees` | `EmployeeController@store` | Create employee (handles multipart file upload) |
-| `GET` | `/api/employees/{employee}` | `EmployeeController@show` | View employee details |
-| `POST` | `/api/employees/{employee}` | `EmployeeController@update` | Update employee (use POST with `_method=PUT` spoofing for file uploads) |
-| `DELETE` | `/api/employees/{employee}` | `EmployeeController@destroy` | Delete employee & clean up their profile picture from disk |
+---
 
-### Validation Rules
-- `name`: Required, String
-- `position`: Required, String
-- `email`: Required, Email, Unique in `employees` table (except current ID on update)
-- `profile_picture`: Optional, must be an image, mime types: `jpeg, png, jpg, gif`, max size 2048 KB (2MB)
+### Solution Code
 
-### Implementation Requirements
-1. **Store File**: Save file under the public disk inside a directory: `public/avatars`.
-2. **Path Helper**: Return the absolute asset URL of the profile picture in the JSON response using `asset(Storage::url($employee->profile_picture))`.
-3. **Clean Up Disk**: 
-   - When a user updates the profile picture, the old file must be physically deleted from disk.
-   - When an employee record is deleted from the database, their profile picture must also be deleted from disk.
-
-### Sample Response: GET `/api/employees/1`
-**Success Response (JSON - 200 OK)**:
-```json
+#### 1. Migration (`database/migrations/xxxx_xx_xx_create_employees_table.php`)
+```php
+public function up(): void
 {
-  "data": {
-    "id": 1,
-    "name": "Jane Doe",
-    "position": "Senior Backend Developer",
-    "email": "jane.doe@example.com",
-    "profile_picture_url": "http://localhost:8000/storage/avatars/abc123xyz_avatar.png"
-  }
+    Schema::create('employees', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('position');
+        $table->string('email')->unique();
+        $table->string('profile_picture')->nullable();
+        $table->timestamps();
+    });
+}
+```
+
+#### 2. Model (`app/Models/Employee.php`)
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Employee extends Model
+{
+    protected $fillable = ['name', 'position', 'email', 'profile_picture'];
+}
+```
+
+#### 3. Routes (`routes/api.php`)
+```php
+use App\Http\Controllers\EmployeeController;
+
+// Standard API Resource
+Route::apiResource('employees', EmployeeController::class);
+```
+
+#### 4. Controller (`app/Http/Controllers/EmployeeController.php`)
+```php
+namespace App\Http\Controllers;
+
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class EmployeeController extends Controller
+{
+    public function index()
+    {
+        $employees = Employee::all()->map(function ($employee) {
+            return $this->formatEmployee($employee);
+        });
+
+        return response()->json($employees, 200);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Max 2MB
+        ]);
+
+        if ($request->hasFile('profile_picture')) {
+            // Save file inside storage/app/public/avatars folder
+            $path = $request->file('profile_picture')->store('avatars', 'public');
+            $validated['profile_picture'] = $path;
+        }
+
+        $employee = Employee::create($validated);
+        return response()->json($this->formatEmployee($employee), 201);
+    }
+
+    public function show(Employee $employee)
+    {
+        return response()->json($this->formatEmployee($employee), 200);
+    }
+
+    /**
+     * NOTE: For Laravel PUT request with multipart/form-data (files),
+     * you should send a POST request with the hidden form field "_method" set to "PUT".
+     */
+    public function update(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'position' => 'required|string|max:255',
+            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($request->hasFile('profile_picture')) {
+            // Delete the old file from disk if it exists
+            if ($employee->profile_picture) {
+                Storage::disk('public')->delete($employee->profile_picture);
+            }
+
+            // Save the new file
+            $path = $request->file('profile_picture')->store('avatars', 'public');
+            $validated['profile_picture'] = $path;
+        }
+
+        $employee->update($validated);
+        return response()->json($this->formatEmployee($employee), 200);
+    }
+
+    public function destroy(Employee $employee)
+    {
+        // Delete file from disk if it exists
+        if ($employee->profile_picture) {
+            Storage::disk('public')->delete($employee->profile_picture);
+        }
+
+        $employee->delete();
+        return response()->json(['message' => 'Employee deleted successfully.'], 200);
+    }
+
+    /**
+     * Format the employee data to return an absolute public storage URL for the avatar.
+     */
+    private function formatEmployee(Employee $employee)
+    {
+        return [
+            'id' => $employee->id,
+            'name' => $employee->name,
+            'position' => $employee->position,
+            'email' => $employee->email,
+            'profile_picture_url' => $employee->profile_picture 
+                ? asset(Storage::url($employee->profile_picture)) 
+                : null
+        ];
+    }
 }
 ```
