@@ -5,8 +5,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-Route::post('/students', [StudentsController::class, 'store']);
-Route::get('/students', [StudentsController::class, 'index']);
+include __DIR__ . '/student/student.php';
+include __DIR__ . '/task/task.php';
+// include('student/student.php');
 
 Route::get('/user', function (Request $request) {
     return $request->user();
