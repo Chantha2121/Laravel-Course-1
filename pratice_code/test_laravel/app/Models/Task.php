@@ -29,8 +29,21 @@ class Task extends Model
     {
         $this->title = $data[self::TITLE] ?? null;
         $this->description = $data[self::DESCRIPTION] ?? null;
-        $this->due_date = $data[self::DUE_DATE] ?? null;
+        $this->due_date = $data[self::DUE_DATE] ?? now();
         $this->status = $data[self::STATUS] ?? 'pending';
         $this->priority = $data[self::PRIORITY] ?? 'medium';
+    }
+
+    public function lists($filter = [])
+    {
+        return self::when(isset($filter['status']), function ($q) use ($filter) {
+            $q->where(self::STATUS, $filter['status']);
+        })
+            ->when(isset($filter['priority']), function ($q) use ($filter) {
+                $q->where(self::PRIORITY, $filter['priority']);
+            })
+            ->when(isset($filter['title']), function ($q) use ($filter) {
+                $q->where(self::TITLE, 'like', '%' . $filter['title'] . '%');
+            });
     }
 }
