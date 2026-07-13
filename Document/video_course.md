@@ -108,3 +108,14 @@ Link : https://youtu.be/kRJg-ZbfWAk
 ### Part 23: Laravel 2
 
 Link : https://youtu.be/bCfE79OUuWw
+
+### Part 24: Laravel 3
+
+Link : https://youtu.be/qVPen8QTR1c
+
+### Part 25: Laravel 4
+
+Link : https://youtu.be/FyTwSxmYe44
+
+### Part 26: Laravel 5
+Link : https://youtu.be/ID6A-v-l6Hs
