@@ -4,10 +4,10 @@ This guide explains how to set up Laravel Sanctum for API authentication.
 
 ## Requirements
 
-- PHP 8.2+
-- Composer
-- Laravel 11 or Laravel 12
-- MySQL/PostgreSQL
+1. PHP 8.2+
+1. Composer
+1. Laravel 11 or Laravel 12
+1. MySQL/PostgreSQL
 
 ---
 
