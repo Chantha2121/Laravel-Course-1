@@ -54,14 +54,14 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
         ]);
-
     }
 
-    public function logout(Request $request){
-        $validated = $request->validate([
-            'token' => 'required|string',
-        ]);
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
 
-        
+        return response()->json([
+            'message' => 'User logged out successfully'
+        ]);
     }
 }
