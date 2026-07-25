@@ -122,3 +122,6 @@ Link : https://youtu.be/ID6A-v-l6Hs
 
 ### Part 27: Final Exercise Part 1
 Link : https://youtu.be/MqnvRLvFZ7M
+
+### Part 28: Final Exercise Part 2
+Link : https://youtu.be/NS4ZJ7caqSk
