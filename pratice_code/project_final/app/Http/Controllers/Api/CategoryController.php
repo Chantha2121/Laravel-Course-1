@@ -36,7 +36,13 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::with('books')->find($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        return response()->json($category, 200);
     }
 
     /**
@@ -44,7 +50,19 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $category = Category::find($id);
+
+        if (! $category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $category->update($validated);
+
+        return response()->json($category, 200);
     }
 
     /**
@@ -52,6 +70,13 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $category = Category::find($id);
+
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+        $category->delete();
+        return response()->json(['message' => 'Category deleted successfully'], 200);
     }
 }

@@ -13,4 +13,5 @@ Route::middleware('auth:sanctum')->group(function () {
     include('book.php');
     include('author.php');
     include('category.php');
+    include('borrow_book_record.php');
 });
