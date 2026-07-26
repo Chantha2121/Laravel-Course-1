@@ -1,3 +1,4 @@
+
 # Video Review Course
 
 ### Part 1: Introduction to Course
@@ -100,7 +101,6 @@ Link : https://youtu.be/cA28ljbS-wE
 
 Link : https://youtu.be/R1vCIo4Oxeg
 
-
 ### Part 23: Laravel 1
 
 Link : https://youtu.be/kRJg-ZbfWAk
@@ -118,10 +118,13 @@ Link : https://youtu.be/qVPen8QTR1c
 Link : https://youtu.be/FyTwSxmYe44
 
 ### Part 26: Laravel 5
+
 Link : https://youtu.be/ID6A-v-l6Hs
 
 ### Part 27: Final Exercise Part 1
+
 Link : https://youtu.be/MqnvRLvFZ7M
 
 ### Part 28: Final Exercise Part 2
+
 Link : https://youtu.be/NS4ZJ7caqSk
