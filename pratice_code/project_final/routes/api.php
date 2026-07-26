@@ -11,4 +11,6 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     include('book.php');
+    include('author.php');
+    include('category.php');
 });

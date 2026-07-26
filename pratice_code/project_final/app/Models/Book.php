@@ -12,6 +12,7 @@ class Book extends Model
     const AUTHOR_ID = 'author_id';
     const CATEGORY_ID = 'category_id';
     const PUBLISHED_YEAR = 'published_year';
+    const IMAGE = 'image';
 
     protected $table = self::TABLE;
     protected $fillable = [
@@ -19,13 +20,16 @@ class Book extends Model
         self::AUTHOR_ID,
         self::CATEGORY_ID,
         self::PUBLISHED_YEAR,
+        self::IMAGE
     ];
 
-    public function author(){
+    public function author()
+    {
         return $this->belongsTo(Author::class, self::AUTHOR_ID, Author::ID);
     }
 
-    public function category(){
+    public function category()
+    {
         return $this->belongsTo(Category::class, self::CATEGORY_ID, Category::ID);
     }
 }
