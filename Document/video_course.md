@@ -128,3 +128,15 @@ Link : https://youtu.be/MqnvRLvFZ7M
 ### Part 28: Final Exercise Part 2
 
 Link : https://youtu.be/NS4ZJ7caqSk
+
+### Part 29: Final Exercise Part 3
+
+Link : https://youtu.be/jJDRG5Nc0pQ
+
+### Part 30: Final Exercise Part 4
+
+Link : https://youtu.be/tYpPtJXjxXg
+
+### Part 31: Final Exercise Part 5 (Final)
+
+Link : https://youtu.be/QFAZwDfy9Dc
