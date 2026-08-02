@@ -1,6 +1,6 @@
 # How to Deploy Laravel with MySQL to Heroku & Import SQL Database
 
-This step-by-step guide walks you through deploying a Laravel application to **Heroku**, configuring a **MySQL database** (JawsDB/ClearDB), importing a custom **`.sql` file**, and configuring all environment variables.
+This step-by-step guide walks you through deploying a Laravel application to **Heroku**, configuring a **MySQL database** (JawsDB/ClearDB), importing a custom **`.sql` file**, and configuring all environment variables cleanly without errors.
 
 ---
 
@@ -29,7 +29,20 @@ In your terminal at the root of your Laravel project, run:
 echo "web: vendor/bin/heroku-php-apache2 public/" > Procfile
 ```
 
-### 1.2 Commit Changes to Git
+### 1.2 Force Track Cache & Storage Placeholders in Git (CRITICAL)
+> ⚠️ **Important:** Git does not track empty folders by default. Without tracking these `.gitignore` files, Heroku deployment will fail with `bootstrap/cache directory must be present` or `Please provide a valid cache path.`
+
+Run the following commands to ensure all required directories exist in Git:
+
+```bash
+git add -f bootstrap/cache/.gitignore
+git add -f storage/framework/views/.gitignore
+git add -f storage/framework/cache/.gitignore
+git add -f storage/framework/sessions/.gitignore
+git add -f storage/logs/.gitignore
+```
+
+### 1.3 Commit Changes to Git
 Ensure all files are committed to git:
 ```bash
 git init
@@ -113,6 +126,8 @@ heroku config:set APP_ENV=production
 heroku config:set APP_KEY="YOUR_GENERATED_APP_KEY"
 heroku config:set APP_DEBUG=false
 heroku config:set APP_URL=https://your-app-name.herokuapp.com
+heroku config:set SESSION_DRIVER=file
+heroku config:set LOG_CHANNEL=stderr
 
 # Database Connection Config (Replace with your actual JawsDB/ClearDB credentials)
 heroku config:set DB_CONNECTION=mysql
@@ -165,19 +180,21 @@ git push heroku main
 
 ## ⚡ Step 7: Run Laravel Post-Deployment Commands
 
-After code deployment, execute essential Artisan commands on Heroku:
+After code deployment, execute essential Artisan commands on Heroku.
+
+> 💡 **Note:** Always wrap commands in double quotes `" ... "` when passing flags like `--force` so Heroku CLI doesn't throw a `Nonexistent flag` error.
 
 ```bash
-# Run migrations (if you have extra migration files)
-heroku run php artisan migrate --force
+# Run migrations (if you have migration files)
+heroku run "php artisan migrate --force"
 
 # Create storage link for uploaded files
-heroku run php artisan storage:link
+heroku run "php artisan storage:link"
 
 # Clear & Cache Configuration / Routes / Views
-heroku run php artisan config:cache
-heroku run php artisan route:cache
-heroku run php artisan view:cache
+heroku run "php artisan config:cache"
+heroku run "php artisan route:cache"
+heroku run "php artisan view:cache"
 ```
 
 ---
@@ -204,25 +221,34 @@ Here is a summary of all commands in sequential order for quick copy-pasting:
 # 1. Prepare Procfile
 echo "web: vendor/bin/heroku-php-apache2 public/" > Procfile
 
-# 2. Git Commit
+# 2. Track essential cache and storage placeholders in Git
+git add -f bootstrap/cache/.gitignore
+git add -f storage/framework/views/.gitignore
+git add -f storage/framework/cache/.gitignore
+git add -f storage/framework/sessions/.gitignore
+git add -f storage/logs/.gitignore
+
+# 3. Git Commit
 git init
 git add .
 git commit -m "Deploy Laravel to Heroku"
 
-# 3. Heroku App & Database Provisioning
+# 4. Heroku App & Database Provisioning
 heroku login
 heroku create my-laravel-app
 heroku addons:create jawsdb:kitefin
 
-# 4. Get Database URL to extract credentials
+# 5. Get Database URL to extract credentials
 heroku config:get JAWSDB_URL
 
-# 5. Set Environment Variables
+# 6. Set Environment Variables
 heroku config:set APP_NAME="MyLaravelApp"
 heroku config:set APP_ENV=production
 heroku config:set APP_KEY="$(php artisan key:generate --show)"
 heroku config:set APP_DEBUG=false
 heroku config:set APP_URL=https://my-laravel-app.herokuapp.com
+heroku config:set SESSION_DRIVER=file
+heroku config:set LOG_CHANNEL=stderr
 heroku config:set DB_CONNECTION=mysql
 heroku config:set DB_HOST="YOUR_DB_HOST"
 heroku config:set DB_PORT=3306
@@ -230,20 +256,20 @@ heroku config:set DB_DATABASE="YOUR_DB_NAME"
 heroku config:set DB_USERNAME="YOUR_DB_USER"
 heroku config:set DB_PASSWORD="YOUR_DB_PASSWORD"
 
-# 6. Import SQL Dump to Heroku MySQL
+# 7. Import SQL Dump to Heroku MySQL
 mysql -h YOUR_DB_HOST -u YOUR_DB_USER -p'YOUR_DB_PASSWORD' YOUR_DB_NAME < path/to/backup.sql
 
-# 7. Push Code to Heroku
+# 8. Push Code to Heroku
 git push heroku main
 
-# 8. Post-deployment Setup
-heroku run php artisan migrate --force
-heroku run php artisan storage:link
-heroku run php artisan config:cache
-heroku run php artisan route:cache
-heroku run php artisan view:cache
+# 9. Post-deployment Setup
+heroku run "php artisan migrate --force"
+heroku run "php artisan storage:link"
+heroku run "php artisan config:cache"
+heroku run "php artisan route:cache"
+heroku run "php artisan view:cache"
 
-# 9. Open & View Logs
+# 10. Open & View Logs
 heroku open
 heroku logs --tail
 ```
