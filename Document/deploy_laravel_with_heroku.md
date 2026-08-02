@@ -4,15 +4,17 @@ This step-by-step guide walks you through deploying a Laravel application to **H
 
 ---
 
-## 📋 Prerequisites
+# 📋 Prerequisites
 
 Before starting, ensure you have installed:
+
 - [Git](https://git-scm.com/)
 - [Composer](https://getcomposer.org/)
 - [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 - [MySQL Client CLI](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) (optional, for direct SQL import)
 
 Verify Heroku installation:
+
 ```bash
 heroku --version
 ```
@@ -22,14 +24,17 @@ heroku --version
 ## 🛠️ Step 1: Prepare Your Laravel Project
 
 ### 1.1 Create `Procfile`
+
 Heroku needs a `Procfile` in your project root directory to tell Apache to point to the `public/` directory.
 
 In your terminal at the root of your Laravel project, run:
+
 ```bash
 echo "web: vendor/bin/heroku-php-apache2 public/" > Procfile
 ```
 
 ### 1.2 Force Track Cache & Storage Placeholders in Git (CRITICAL)
+
 > ⚠️ **Important:** Git does not track empty folders by default. Without tracking these `.gitignore` files, Heroku deployment will fail with `bootstrap/cache directory must be present` or `Please provide a valid cache path.`
 
 Run the following commands to ensure all required directories exist in Git:
@@ -43,7 +48,9 @@ git add -f storage/logs/.gitignore
 ```
 
 ### 1.3 Commit Changes to Git
+
 Ensure all files are committed to git:
+
 ```bash
 git init
 git add .
@@ -55,15 +62,19 @@ git commit -m "Prepare Laravel app for Heroku deployment"
 ## 🚀 Step 2: Login to Heroku & Create Application
 
 ### 2.1 Login to Heroku CLI
+
 ```bash
 heroku login
 ```
+
 *(Press any key to open the browser and authorize your Heroku account).*
 
 ### 2.2 Create Heroku App
+
 ```bash
 heroku create your-app-name
 ```
+
 *(If you leave `your-app-name` blank, Heroku will generate a random name for you).*
 
 ---
@@ -73,35 +84,41 @@ heroku create your-app-name
 Heroku does not come with MySQL built-in, so you need to provision a MySQL add-on such as **JawsDB MySQL** or **ClearDB MySQL**.
 
 ### Option A: Provision JawsDB MySQL (Recommended)
+
 ```bash
 heroku addons:create jawsdb:kitefin
 ```
 
 ### Option B: Provision ClearDB MySQL
+
 ```bash
 heroku addons:create cleardb:ignite
 ```
 
 ### 3.1 Get MySQL Database Credentials
+
 Run the following command to retrieve your database connection URL:
 
 For JawsDB:
+
 ```bash
 heroku config:get JAWSDB_URL
 ```
 
 For ClearDB:
+
 ```bash
 heroku config:get CLEARDB_DATABASE_URL
 ```
 
-**Output format:**  
+**Output format:**
 `mysql://username:password@hostname:port/databasename?reconnect=true`
 
-Example:  
+Example:
 `mysql://u8x92abc:p4ssw0rd123@us-cdbr-east-06.cleardb.net:3306/heroku_1234567`
 
 From this URL, identify:
+
 - **DB_HOST**: `us-cdbr-east-06.cleardb.net` (or hostname)
 - **DB_USER**: `u8x92abc`
 - **DB_PASS**: `p4ssw0rd123`
@@ -113,6 +130,7 @@ From this URL, identify:
 ## 🔑 Step 4: Configure Environment Variables (`.env`) on Heroku
 
 Generate a Laravel application key locally if you don't have one:
+
 ```bash
 php artisan key:generate --show
 ```
@@ -145,6 +163,7 @@ heroku config:set DB_PASSWORD=password_from_step_3
 If you have a local SQL file (e.g. `database.sql` or `backup.sql`) that you want to import into your Heroku MySQL database:
 
 ### Method 1: Import via Local MySQL Command Line (Fastest & Safest)
+
 Using the database details obtained in **Step 3.1**:
 
 ```bash
@@ -152,6 +171,7 @@ mysql -h HOSTNAME -u USERNAME -p'PASSWORD' DATABASENAME < path/to/your_database.
 ```
 
 *Example:*
+
 ```bash
 mysql -h us-cdbr-east-06.cleardb.net -u u8x92abc -p'p4ssw0rd123' heroku_1234567 < database.sql
 ```
@@ -159,6 +179,7 @@ mysql -h us-cdbr-east-06.cleardb.net -u u8x92abc -p'p4ssw0rd123' heroku_1234567 
 > **Note:** Notice there is no space between `-p` and `'PASSWORD'`.
 
 ### Method 2: Import via GUI Client (TablePlus / DBeaver / Sequel Ace)
+
 1. Open TablePlus, DBeaver, or Sequel Ace.
 2. Create a new connection using **MySQL**.
 3. Fill in **Host**, **User**, **Password**, **Database**, and **Port (3306)** from Step 3.1.
@@ -174,6 +195,7 @@ Push your code from local Git to Heroku's remote repository:
 ```bash
 git push heroku main
 ```
+
 *(If your local default branch is `master`, use `git push heroku master`).*
 
 ---
@@ -202,11 +224,13 @@ heroku run "php artisan view:cache"
 ## 🔍 Step 8: Test & Check Logs
 
 ### Open your Application:
+
 ```bash
 heroku open
 ```
 
 ### View Real-time App Logs (for debugging):
+
 ```bash
 heroku logs --tail
 ```
